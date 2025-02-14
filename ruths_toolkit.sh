@@ -15,17 +15,11 @@ if [[ $EUID -ne 0 ]]; then
     echo -e "\e[91m[-] This script must be run as root!\e[0m"
     exit 1
 fi
-
-# Get the local IP address
 LHOST=$(hostname -I | awk '{print $1}')
-
-# Main Menu
 echo -e "\e[94m[1] Devices (Windows/Android)\e[0m"
 echo -e "\e[94m[2] Post-Exploitation\e[0m"
 echo -e "\e[94m[3] Port Forwarding\e[0m"
 read -p "Select an option (1-3): " MAIN_OPTION
-
-# Devices Menu
 if [[ $MAIN_OPTION -eq 1 ]]; then
     echo -e "\e[93m[1] Windows\e[0m"
     echo -e "\e[93m[2] Android\e[0m"
